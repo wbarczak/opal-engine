@@ -1,0 +1,7 @@
+{
+    "#": "stone_wall",
+    "%": "blackstone_wall",
+    "@": "brick_wall",
+    "*": "wood_wall",
+    "&": "bush_wall"
+}

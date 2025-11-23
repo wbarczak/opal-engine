@@ -1,0 +1,7 @@
+{
+    "stone_wall": "assets/stone.png",
+    "blackstone_wall": "assets/blackstone.png",
+    "brick_wall": "assets/brick.png",
+    "wood_wall": "assets/planks.png",
+    "bush_wall":  "assets/bush.png"
+}
