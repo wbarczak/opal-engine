@@ -18,10 +18,10 @@ public:
 
 	struct RaycastResult
 	{
-		float distance = 0.0f;
-		TextureId textureId = Renderer::NO_TEXTURE;
-		float point = 0.0f;
 		bool sideways = false;
+		TextureId textureId = Renderer::NO_TEXTURE;
+		float distance = 0.0f;
+		float point = 0.0f;
 	};
 
 	std::optional<RaycastResult> raycast(Vec2 origin, Vec2 direction) const;

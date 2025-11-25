@@ -119,10 +119,10 @@ std::optional<World::RaycastResult> World::raycast(Vec2 origin, Vec2 direction) 
             }
 
             out = RaycastResult{
-                distance,
+                sideways,
                 tile(mapCheck).textureId(),
-                point,
-                sideways
+                distance,
+                point
             };
 
             break;
