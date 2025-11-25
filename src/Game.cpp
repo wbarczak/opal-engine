@@ -59,15 +59,11 @@ static void draw();
 
 void Game::loop()
 {
-	auto previous = std::chrono::steady_clock::now();
+	SecClock clock;
 
 	while (!Window::shouldClose())
 	{
-		auto now = std::chrono::steady_clock::now();
-		std::chrono::duration<float> dt = now - previous;
-		previous = now;
-
-		tick(dt.count());
+		tick(clock.restart());
 
 		Renderer::beginDrawing();
 		Renderer::clearBackground();
