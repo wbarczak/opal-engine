@@ -87,23 +87,27 @@ struct Col
 	uint8_t g;
 	uint8_t b;
 	uint8_t a;
+
+	constexpr Col(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) :
+		r(r), g(g), b(b), a(a) {}
 };
 
 namespace Colors
 {
-	constexpr Col Black{ 0,0,0,255 };
-	constexpr Col White{ 255,255,255,255 };
-	constexpr Col Gray{ 30,30,30,255 };
-	constexpr Col LightGray{ 60,60,60,255 };
-	constexpr Col DarkTint{ 0,0,0,50 };
-	constexpr Col Red{ 255,0,0,255 };
-	constexpr Col Green{ 0,255,0,255 };
-	constexpr Col Blue{ 0,0,255,255 };
+	constexpr Col Black(0,0,0,255);
+	constexpr Col White(255,255,255,255);
+	constexpr Col Gray(30,30,30,255);
+	constexpr Col LightGray(60,60,60,255);
+	constexpr Col DarkTint(0,0,0,50);
+	constexpr Col Red(255,0,0,255);
+	constexpr Col Green(0,255,0,255);
+	constexpr Col Blue(0,0,255,255);
 }
 
 class SecClock
 {
 public:
+
 	SecClock() : m_StartingTime(std::chrono::steady_clock::now()) {}
 
 	float restart()
@@ -132,26 +136,26 @@ inline std::ostream& operator<<(std::ostream& os, const Vec2& v) {
 
 inline Vec2 operator-(const Vec2& a) noexcept
 {
-	return Vec2{
+	return Vec2(
 		-a.x,
 		-a.y
-	};
+	);
 }
 
 inline Vec2 operator+(const Vec2& a, const Vec2& b) noexcept
 {
-	return Vec2{
+	return Vec2(
 		a.x + b.x,
 		a.y + b.y
-	};
+	);
 }
 
 inline Vec2 operator-(const Vec2& a, const Vec2& b) noexcept
 {
-	return Vec2{
+	return Vec2(
 		a.x - b.x,
 		a.y - b.y
-	};
+	);
 }
 
 inline Vec2& operator+=(Vec2& a, const Vec2& b) noexcept
@@ -170,27 +174,28 @@ inline Vec2& operator-=(Vec2& a, const Vec2& b) noexcept
 
 inline Vec2 operator*(const Vec2& v, float n) noexcept
 {
-	return Vec2{
+	return Vec2(
 		v.x * n,
 		v.y * n
-	};
+	);
 }
 
 inline Vec2 operator*(float n, const Vec2& v) noexcept
 {
-	return Vec2{
+	return Vec2(
 		v.x * n,
 		v.y * n
-	};
+	);
 }
 
 inline Vec2 operator/(const Vec2& v, float n) noexcept
 {
-	assert(n, "Scalar Vec2 division by 0!");
-	return Vec2{
+	assert(n);
+
+	return Vec2(
 		v.x / n,
 		v.y / n
-	};
+	);
 }
 
 inline Vec2& operator*=(Vec2& v, float n) noexcept
@@ -202,7 +207,7 @@ inline Vec2& operator*=(Vec2& v, float n) noexcept
 
 inline Vec2& operator/=(Vec2& v, float n) noexcept
 {
-	assert(n, "Scalar Vec2 division by 0!");
+	assert(n);
 	v.x /= n;
 	v.y /= n;
 	return v;
@@ -227,10 +232,10 @@ Vec2 Vec2::normalized() const noexcept
 
 Vec2::operator Vec2i() const noexcept
 {
-	return Vec2i{
+	return Vec2i(
 		static_cast<int32_t>(x),
 		static_cast<int32_t>(y)
-	};
+	);
 }
 
 inline std::ostream& operator<<(std::ostream& os, const Rect& r) {
