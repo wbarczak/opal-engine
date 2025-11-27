@@ -4,6 +4,8 @@
 #include <vector>
 #include <queue>
 #include "Renderer.hpp"
+#include "Window.hpp"
+#include "Systems.hpp"
 
 #include "RayCore.hpp"
 
@@ -51,28 +53,6 @@ TextureId Renderer::getNumericalId(const std::string& stringId)
 	return s_IntIds[stringId];
 }
 
-void Renderer::drawCeiling(Col color)
-{
-	DrawRectangle(
-		0,
-		0,
-		GetScreenWidth(),
-		GetScreenHeight() / 2,
-		toRay(color)
-	);
-}
-
-void Renderer::drawFloor(Col color)
-{
-	DrawRectangle(
-		0,
-		GetScreenHeight() / 2,
-		GetScreenWidth(),
-		GetScreenHeight() / 2,
-		toRay(color)
-	);
-}
-
 void Renderer::drawTexture(Rect rectangle, TextureId id, Col color)
 {
 	DrawTexturePro(
@@ -85,10 +65,32 @@ void Renderer::drawTexture(Rect rectangle, TextureId id, Col color)
 	);
 }
 
-void Renderer::drawCollumn(int16_t index, float lineHeight, TextureId id, float point, bool darken, Col color)
+static void drawCeiling(Col color)
 {
-	int32_t start = -lineHeight / 2 + GetScreenHeight() / 2;
-	int32_t end = lineHeight / 2 + GetScreenHeight() / 2;
+	DrawRectangle(
+		0,
+		0,
+		GetScreenWidth(),
+		GetScreenHeight() / 2,
+		toRay(color)
+	);
+}
+
+static void drawFloor(Col color)
+{
+	DrawRectangle(
+		0,
+		GetScreenHeight() / 2,
+		GetScreenWidth(),
+		GetScreenHeight() / 2,
+		toRay(color)
+	);
+}
+
+void drawCollumn(int16_t index, float lineHeight, TextureId id, float point, bool darken, Col color = Colors::White)
+{
+	int32_t start = -lineHeight / 2 + Window::getHeight() / 2;
+	int32_t end = lineHeight / 2 + Window::getHeight() / 2;
 	float startWidth = (float)s_Textures[id].width * point;
 	Rectangle destination{ (float)index, (float)start, 1, (float)end - start + 1 };
 
@@ -108,6 +110,44 @@ void Renderer::drawCollumn(int16_t index, float lineHeight, TextureId id, float 
 			{0.0f,0.0f},
 			0.0f,
 			toRay(Colors::DarkTint)
+		);
+	}
+}
+
+constexpr float k_Fov = std::numbers::pi / 180.0f * 90.0f;
+
+void Systems::displayView(GameContext& context, size_t entityId)
+{
+	const int32_t width = Window::getWidth();
+	const int32_t height = Window::getHeight();
+
+	auto playerTransform = context.entities.get<Comp::Transform>(entityId);;
+	auto position = playerTransform.position;
+	auto angle = playerTransform.angle;
+	const float angleIncrement = k_Fov / (float)width;
+	float angleStart = angle - (k_Fov * 0.5f);
+
+	drawCeiling(Colors::Gray);
+	drawFloor(Colors::LightGray);
+
+	for (size_t column = 0; column < width; ++column)
+	{
+		float rayAngle = angleStart + column * angleIncrement;
+		Vec2 direction = Vec2::direction(rayAngle);
+
+		auto hit = context.level.raycast(position, direction);
+
+		if (!hit) continue;
+
+		float perpendicularDistance = hit.value().distance * cosf(rayAngle - angle);
+		int32_t lineHeight = (int)(height / perpendicularDistance);
+
+		drawCollumn(
+			column,
+			lineHeight,
+			hit.value().textureId,
+			hit.value().point,
+			hit.value().sideways
 		);
 	}
 }

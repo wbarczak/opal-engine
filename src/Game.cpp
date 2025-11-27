@@ -7,21 +7,16 @@
 #include "Core.hpp"
 #include "Window.hpp"
 #include "World.hpp"
-#include "Entities.hpp"
 #include "EntityManager.hpp"
 #include "Systems.hpp"
 
 #include "raylib.h"
 
-constexpr float k_Fov = std::numbers::pi / 180.0f * 90.0f;
-
-static Entities::Player s_Player;
-
-static EntityManager s_Entities;
-static World s_Level;
+static GameContext s_Context;
 
 static size_t s_PlayerId;
 static void spawnPlayer(Vec2 position);
+static void displayPlayerAttributes(GameContext& context);
 
 void Game::init()
 {
@@ -47,8 +42,8 @@ void Game::init()
 		file.clear();
 		file.open("data/test_map.json");
 		file >> mapping;
-		s_Level.load(mapping);
-		s_Player.setPosition(Vec2(mapping["spawnpoint"][0],mapping["spawnpoint"][1]));
+		s_Context.level.load(mapping);
+		spawnPlayer(Vec2(mapping["spawnpoint"][0],mapping["spawnpoint"][1]));
 	}
 	DisableCursor();
 }
@@ -61,7 +56,6 @@ void Game::cleanup()
 }
 
 static void tick(float dt);
-static void draw();
 
 void Game::loop()
 {
@@ -74,11 +68,7 @@ void Game::loop()
 		Renderer::beginDrawing();
 		Renderer::clearBackground();
 
-		Renderer::drawCeiling(Colors::Gray);
-		Renderer::drawFloor(Colors::LightGray);
-
-		Systems::displayView(s_Entities, s_PlayerId);
-		draw();
+		Systems::displayView(s_Context, s_PlayerId);
 
 		Renderer::endDrawing();
 	}
@@ -86,53 +76,28 @@ void Game::loop()
 
 void tick(float dt)
 {
-	s_Player.tick(dt);
-
-	Systems::applyVelocity(s_Entities);
-}
-
-void draw()
-{
-	const int32_t width = Window::getWidth();
-	const int32_t height = Window::getHeight();
-
-	auto position = s_Player.getPosition();
-	auto angle = s_Player.getAngle();
-	const float angleIncrement = k_Fov / (float)width;
-	float angleStart = angle - (k_Fov * 0.5f);
-
-	Renderer::drawCeiling(Colors::Gray);
-	Renderer::drawFloor(Colors::LightGray);
-
-	for (size_t column = 0; column < width; ++column)
-	{
-		float rayAngle = angleStart + column * angleIncrement;
-		Vec2 direction = Vec2::direction(rayAngle);
-
-		auto hit = s_Level.raycast(position, direction);
-
-		if (!hit) continue;
-
-		float perpendicularDistance = hit.value().distance * cosf(rayAngle - angle);
-		int32_t lineHeight = (int)(height / perpendicularDistance);
-
-		Renderer::drawCollumn(
-			column,
-			lineHeight,
-			hit.value().textureId,
-			hit.value().point,
-			hit.value().sideways
-		);
-	}
+	Systems::moveControlable(s_Context, dt);
+	Systems::applyVelocity(s_Context, dt);
 }
 
 void spawnPlayer(Vec2 position)
 {
-	s_PlayerId = s_Entities.spawn();
+	auto& entities = s_Context.entities;
+	s_PlayerId = entities.spawn();
 
-	s_Entities.add<Comp::Controlable>(s_PlayerId);
-	s_Entities.add<Comp::Transform>(s_PlayerId, position);
-	s_Entities.add<Comp::Velocity>(s_PlayerId, 3.0f, 20.0f, 20.f);
-	s_Entities.add<Comp::Collider>(s_PlayerId, 0.3f);
-	s_Entities.remove<Comp::Controlable>(s_PlayerId);
+	entities.add<Comp::Controlable>(s_PlayerId);
+	entities.add<Comp::Transform>(s_PlayerId, position);
+	entities.add<Comp::Velocity>(s_PlayerId, 3.0f, 20.0f, 20.f);
+	entities.add<Comp::Collider>(s_PlayerId, 0.3f);
+}
+
+static void displayPlayerAttributes(GameContext& context)
+{
+	auto& entities = s_Context.entities;
+	auto id = s_PlayerId;
+
+	auto transform = entities.get<Comp::Transform>(id);
+	auto velocity = entities.get<Comp::Velocity>(id);
+
+	std::cout << transform.position << " " << transform.angle << " " << velocity.current << std::endl;
 }

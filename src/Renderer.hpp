@@ -18,8 +18,5 @@ namespace Renderer
 	bool loadTexturesFromImages();
 	void unload();
 	TextureId getNumericalId(const std::string& stringId);
-	void drawCeiling(Col color);
-	void drawFloor(Col color);
 	void drawTexture(Rect rectangle, TextureId id, Col color = Colors::White);
-	void drawCollumn(int16_t index, float lineHeight, TextureId id, float point, bool darken = false, Col color = Colors::White);
 }

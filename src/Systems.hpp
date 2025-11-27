@@ -1,11 +1,18 @@
 #pragma once
 
-class World;
-class EntityManager;
+#include "World.hpp"
+#include "EntityManager.hpp"
+
+struct GameContext
+{
+	World level;
+	EntityManager entities;
+};
 
 namespace Systems
 {
-	void resolveWorldColisions(World& world, EntityManager& entities);
-	void applyVelocity(EntityManager& entities);
-	void displayView(EntityManager& entities, size_t currentEntity);
+	void resolveWorldColisions(GameContext& context);
+	void applyVelocity(GameContext& context, float dt);
+	void displayView(GameContext& context, size_t currentEntity);
+	void moveControlable(GameContext& context, float dt);
 }
