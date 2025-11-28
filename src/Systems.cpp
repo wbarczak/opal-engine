@@ -47,7 +47,13 @@ void Systems::resolveWorldColisions(GameContext& context)
 					continue;
 				}
 				
-				fullResolution += bounds.resolve(Rect(x, y, 1.0f, 1.0f));
+				auto resolution = bounds.resolve(Rect(x, y, 1.0f, 1.0f));
+				fullResolution = Vec2(
+					std::abs(resolution.x) > std::abs(fullResolution.x) ?
+					resolution.x : fullResolution.x,
+					std::abs(resolution.y) > std::abs(fullResolution.y) ?
+					resolution.y : fullResolution.y
+				);
 			}
 		}
 
